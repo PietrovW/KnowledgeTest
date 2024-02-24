@@ -15,7 +15,7 @@ public class CreateCandidateHandler
 
     public CandidateCreated Handle(CreateCandidate command)
     {
-        this.candidateRepository.Store(new Candidate() { Email=command.Email, LastName=command.LastName, Name=command.Name });
+        this.candidateRepository.Store(new Candidate() {Id=command.Id, Email=command.Email, LastName=command.LastName, Name=command.Name });
         return new CandidateCreated();
     }
 }

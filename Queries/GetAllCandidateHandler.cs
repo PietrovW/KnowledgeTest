@@ -15,6 +15,6 @@ public class GetAllCandidateHandler
 
     public Task<IEnumerable<Candidate>> Handle(GetAllCandidate command)
     {
-        return Task.FromResult(_candidateRepository.GetAllCandidates());
+        return Task.FromResult(_candidateRepository.GetAll());
     }
 }

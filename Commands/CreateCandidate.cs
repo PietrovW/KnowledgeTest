@@ -2,4 +2,8 @@
 
 namespace KnowledgeTest.Commands;
 
-public record CreateCandidate(string Name, string LastName, string Email) :ICommand;
+public record CreateCandidate(
+    Guid Id ,
+    string Name, 
+    string LastName, 
+    string Email) :ICommand;
