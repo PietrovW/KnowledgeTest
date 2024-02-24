@@ -4,15 +4,21 @@ using KnowledgeTest.Queries;
 using KnowledgeTest.Repositorys;
 using Oakton;
 using Wolverine;
+using Wolverine.FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Host.UseWolverine();
+builder.Host.UseWolverine(opts =>
+{
+    opts.UseFluentValidation();
+    opts.UseFluentValidation(RegistrationBehavior.ExplicitRegistration);
+});
 
 builder.Services.AddSingleton<ICandidateRepository, CandidateRepository>();
 builder.Services.AddSingleton<IQuestionRepository, QuestionRepository>();
+builder.Services.AddSingleton<ITestRepository, TestRepository>();
 var app = builder.Build();
 
 app.MapPost("/candidates", async (CreateCandidate body, IMessageBus bus) =>
@@ -39,6 +45,13 @@ app.MapGet("/questions/{id}", async (Guid id, IMessageBus bus) =>
             : Results.NotFound())
     .WithOpenApi();
 app.MapGet("/questions/", async (IMessageBus bus) => await bus.InvokeAsync<IEnumerable<Question>>(new GetAllQuestion()));
+
+
+app.MapPost("/tests", async (CreateTest body, IMessageBus bus) =>
+{
+    await bus.InvokeAsync(body);
+    return Results.Created($"/tests/{body.Id}", body);
+}).WithOpenApi();
 
 if (app.Environment.IsDevelopment())
 {
