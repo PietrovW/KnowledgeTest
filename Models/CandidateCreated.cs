@@ -1,5 +1,3 @@
 ﻿namespace KnowledgeTest.Models;
 
-public record CandidateCreated
-{
-}
+public record CandidateCreated();

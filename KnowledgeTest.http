@@ -1,6 +1,43 @@
-@KnowledgeTest_HostAddress = http://localhost:5106
+@KnowledgeTest_HostAddress = https://localhost:7031
 
-GET {{KnowledgeTest_HostAddress}}/candidates/getAll/
+
+Post {{KnowledgeTest_HostAddress}}/candidates
+Content-Type: application/json
+
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "name": "string",
+  "lastName": "string",
+  "email": "string"
+}
+###
+GET {{KnowledgeTest_HostAddress}}/candidates/{id}
 Accept: application/json
+###
+GET {{KnowledgeTest_HostAddress}}/candidates
+Accept: application/json
+###
+Post {{KnowledgeTest_HostAddress}}/questions
+Content-Type: application/json
 
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "contents": "string",
+  "type": "string",
+  "difficultyLevel": "string",
+  "category": "string",
+  "answers": [
+    {
+      "contents": "string",
+      "isCorrect": true
+    }
+  ]
+}
+###
+
+GET {{KnowledgeTest_HostAddress}}/questions/{id}
+Accept: application/json
+###
+GET {{KnowledgeTest_HostAddress}}/questions
+Accept: application/json
 ###

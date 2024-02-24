@@ -6,5 +6,5 @@ public interface ICandidateRepository
 {
     public void Store(Candidate issue);
     public Candidate Get(Guid id);
-    public IEnumerable<Candidate> GetAllCandidates();
+    public IEnumerable<Candidate> GetAll();
 }

@@ -1,6 +1,6 @@
 ﻿namespace KnowledgeTest.Models;
 
-public record Question
+public record Question: IBaseModel
 {
     public string Contents { get; init; }
     public string Type { get; init; }

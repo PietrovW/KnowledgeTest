@@ -1,8 +1,7 @@
 ﻿namespace KnowledgeTest.Models;
 
-public record Candidate
+public record Candidate: IBaseModel
 {
-    public Guid Id { get; init; } = Guid.NewGuid();
     public string Name { get; init; }
     public string LastName { get; init; }
     public string Email { get; init; }

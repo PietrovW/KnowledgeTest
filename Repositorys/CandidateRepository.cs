@@ -21,7 +21,7 @@ public class CandidateRepository: ICandidateRepository
         throw new ArgumentOutOfRangeException(nameof(id), "candidates does not exist");
     }
 
-    public IEnumerable<Candidate> GetAllCandidates() {
+    public IEnumerable<Candidate> GetAll() {
     
         return _candidates.Values;
     }
