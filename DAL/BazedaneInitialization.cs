@@ -1,7 +1,6 @@
 ﻿using KnowledgeTest.Models;
 using Neo4j.Driver;
 using System.Text;
-
 namespace KnowledgeTest.DAL;
 
 public class BazedaneInitialization
@@ -37,8 +36,9 @@ public class BazedaneInitialization
             .ToString();
 
         using var session = _driver.AsyncSession();
-
-        await session.RunAsync(cypher, new Dictionary<string, object>() { { "persons", ParameterSerializer.ToDictionary(persons) } });
+      
+        string output = System.Text.Json.JsonSerializer.Serialize(persons);
+        await session.RunAsync(cypher, new Dictionary<string, object>() { { "persons", output } });
 
     }
 
@@ -51,22 +51,11 @@ public class BazedaneInitialization
             .ToString();
 
         using var session = _driver.AsyncSession();
-        await session.RunAsync(cypher, new Dictionary<string, object>() { { "genres", ParameterSerializer.ToDictionary(questions) } });
+        string output = System.Text.Json.JsonSerializer.Serialize(questions);
+        await session.RunAsync(cypher, new Dictionary<string, object>() { { "genres", output } });
     }
 
-    public async Task CreateMovies(IList<Movie> movies)
-    {
-        string cypher = new StringBuilder()
-            .AppendLine("UNWIND {movies} AS movie")
-            .AppendLine("MERGE (m:Movie {id: movie.id})")
-            .AppendLine("SET m = movie")
-            .ToString();
 
-        using (var session = driver.Session())
-        {
-            await session.RunAsync(cypher, new Dictionary<string, object>() { { "movies", ParameterSerializer.ToDictionary(movies) } });
-        }
-    }
 
     //public async Task CreateRelationships(IList<MovieInformation> metadatas)
     //{
