@@ -4,7 +4,7 @@ namespace KnowledgeTest.Repositorys;
 
 public interface IQuestionRepository
 {
-    public void Store(Question issue);
+    public Task Store(Question issue);
     public Question Get(Guid id);
-    public IEnumerable<Question> GetAll();
+    public Task<IEnumerable<Question>> GetAll();
 }

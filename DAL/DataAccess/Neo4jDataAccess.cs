@@ -38,7 +38,7 @@ public class Neo4jDataAccess : INeo4jDataAccess
         {
             parameters = parameters == null ? new Dictionary<string, object>() : parameters;
 
-            var result = await _session.ReadTransactionAsync(async tx =>
+            var result = await _session.ExecuteReadAsync(async tx =>
             {
                 T scalar = default(T);
                 var res = await tx.RunAsync(query, parameters);
@@ -64,7 +64,7 @@ public class Neo4jDataAccess : INeo4jDataAccess
         {
             parameters = parameters == null ? new Dictionary<string, object>() : parameters;
 
-            var result = await _session.WriteTransactionAsync(async tx =>
+            var result = await _session.ExecuteWriteAsync(async tx =>
             {
                 T scalar = default(T);
                 var res = await tx.RunAsync(query, parameters);
@@ -87,13 +87,16 @@ public class Neo4jDataAccess : INeo4jDataAccess
         {
             parameters = parameters == null ? new Dictionary<string, object>() : parameters;
 
-            var result = await _session.ReadTransactionAsync(async tx =>
+            var result = await _session.ExecuteReadAsync(async tx =>
             {
                 var data = new List<T>();
                 var res = await tx.RunAsync(query, parameters);
                 var records = await res.ToListAsync();
-                data = records.Select(x => (T)x.Values[returnObjectKey]).ToList();
+                //   data = records.Select(x => (T)x.Values[returnObjectKey]).ToList();
+                var teste = records.Select(x => x.Values).ToList();
+                data = records.Select(x=> (T)x.Values).ToList();
                 return data;
+                
             });
 
             return result;

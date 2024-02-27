@@ -12,8 +12,8 @@ public class GetAllQuestionHandler
         this._questionRepository = questionRepository;
     }
 
-    public Task<IEnumerable<Question>> Handle(GetAllQuestion command)
+    public async Task<IEnumerable<Question>> Handle(GetAllQuestion command)
     {
-        return Task.FromResult(_questionRepository.GetAll());
+        return await _questionRepository.GetAll();
     }
 }
