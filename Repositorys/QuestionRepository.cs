@@ -18,7 +18,7 @@ public class QuestionRepository: IQuestionRepository
     
     public async Task Store(Question question)
     {
-        var query = @"MERGE (p:Question {id:$id}) ON CREATE SET p.difficultyLevel = $difficultyLevel, p.contents = $contents
+        var query = @"MERGE (p:Question {id:$id}) ON CREATE SET p.difficultyLevel = $difficultyLevel, p.contents = $contents,p.answers = $answers
                             ON MATCH SET p.difficultyLevel = $difficultyLevel ,p.contents = $contents,p.answers = $answers, p.id=$id , p.updatedAt = timestamp() RETURN true";
 
         string output = System.Text.Json.JsonSerializer.Serialize(question.Answers);
@@ -45,11 +45,10 @@ public class QuestionRepository: IQuestionRepository
 
     public async Task<IEnumerable<Question>> GetAll()
     {
-
         var query = "MATCH (n:Question) RETURN n.contents , n.type , n.difficultyLevel, n.Category ,n.answers";
         
-       var test = await _neo4jDataAccess.ExecuteReadListAsync(query:query,"");
-        return null;
+       var test = await _neo4jDataAccess.ExecuteReadListAsync<Question>(query:query,"");
+        return test;
     }
 
     public async Task<List<Dictionary<string, object>>> SearchPersonsByName(string searchString)
