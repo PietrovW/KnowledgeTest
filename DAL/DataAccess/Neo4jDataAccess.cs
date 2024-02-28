@@ -1,6 +1,9 @@
-﻿using KnowledgeTest.Options;
+﻿using KnowledgeTest.Models;
+using KnowledgeTest.Options;
 using Microsoft.Extensions.Options;
 using Neo4j.Driver;
+using System;
+using System.Text.Json;
 
 namespace KnowledgeTest.DAL.DataAccess;
 
@@ -80,7 +83,45 @@ public class Neo4jDataAccess : INeo4jDataAccess
             throw;
         }
     }
- 
+    string MyDictionaryToJson(IReadOnlyDictionary<string,object> dict)
+    {
+        var entries = dict.Select(d =>
+            string.Format("\"{0}\": \"{1}\"", d.Key.Replace("n.",""), string.Join(",", d.Value)));
+        return "{" + string.Join(",", entries).Replace("\"[","[").Replace("]\"", "]") + "}";
+    }
+    private async Task<List<T>> ExecuteReadTransactionAsync<T>(string query, IDictionary<string, object>? parameters)
+    {
+        try
+        {
+            parameters = parameters == null ? new Dictionary<string, object>() : parameters;
+
+            var result = await _session.ExecuteReadAsync(async tx =>
+            {
+                var data = new List<T>();
+                var res = await tx.RunAsync(query, parameters);
+                var records = await res.ToListAsync();
+                //   data = records.Select(x => (T)x.Values[returnObjectKey]).ToList();
+                var teste = records.Select(x => x.Values).ToList();
+                foreach(var iten in teste)
+                {
+                    
+                    data.Add(JsonSerializer.Deserialize<T>(MyDictionaryToJson(iten)));
+                   // data.Add(JsonSerializer.Deserialize<T>(iten.Values));
+                }
+                data = records.Select(x => (T)x.Values).ToList();
+                return data;
+
+            });
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was a problem while executing database query");
+            throw;
+        }
+    }
+    
     private async Task<List<T>> ExecuteReadTransactionAsync<T>(string query, string returnObjectKey, IDictionary<string, object>? parameters)
     {
         try
@@ -94,6 +135,21 @@ public class Neo4jDataAccess : INeo4jDataAccess
                 var records = await res.ToListAsync();
                 //   data = records.Select(x => (T)x.Values[returnObjectKey]).ToList();
                 var teste = records.Select(x => x.Values).ToList();
+
+
+                //var teste = records.Select(x => x.Values).ToList();
+                foreach (var iten in teste)
+                {
+                    var tets2 = MyDictionaryToJson(iten);
+                    tets2= tets2.Replace("n.", "").Replace("n.", "").Replace("n.", "").Replace("n.", "").Replace("n.", "").Replace("n.", "").Replace("n.", "");
+                    var jsonSerializerOptions = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    };
+                    var test =JsonSerializer.Deserialize<Question>(json:MyDictionaryToJson(iten),options: jsonSerializerOptions);
+                    // data.Add(JsonSerializer.Deserialize<T>(iten.Values));
+                }
+
                 data = records.Select(x=> (T)x.Values).ToList();
                 return data;
                 

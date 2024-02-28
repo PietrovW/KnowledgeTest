@@ -15,9 +15,10 @@ public class QuestionRepository: IQuestionRepository
         _neo4jDataAccess = neo4jDataAccess;
         _logger = logger;
     }
+    
     public async Task Store(Question question)
     {
-        var query = @"MERGE (p:Question {id: $id}) 
+        var query = @"MERGE (p:Question {id:$id}) ON CREATE SET p.difficultyLevel = $difficultyLevel, p.contents = $contents
                             ON MATCH SET p.difficultyLevel = $difficultyLevel ,p.contents = $contents,p.answers = $answers, p.id=$id , p.updatedAt = timestamp() RETURN true";
 
         string output = System.Text.Json.JsonSerializer.Serialize(question.Answers);
