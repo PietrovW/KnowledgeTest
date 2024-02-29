@@ -12,8 +12,8 @@ public class GetByIdQuestioneHandler
         this._questionRepository = questionRepository;
     }
 
-    public Task<Question> Handle(GetByIdQuestion command)
+    public async Task<Question> Handle(GetByIdQuestion command, CancellationToken cancellationToken = default(CancellationToken))
     {
-        return Task.FromResult(_questionRepository.Get(command.Id));
+        return await _questionRepository.GetById(command.Id, cancellationToken: cancellationToken);
     }
 }

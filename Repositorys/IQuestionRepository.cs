@@ -4,7 +4,7 @@ namespace KnowledgeTest.Repositorys;
 
 public interface IQuestionRepository
 {
-    public Task Store(Question issue);
-    public Question Get(Guid id);
-    public Task<IEnumerable<Question>> GetAll();
+    public Task<bool> Insert(Question question, CancellationToken cancellationToken = default(CancellationToken));
+    public Task<Question> GetById(Guid id, CancellationToken cancellationToken = default(CancellationToken));
+    public Task<IEnumerable<Question>> GetAll(CancellationToken cancellationToken = default(CancellationToken));
 }

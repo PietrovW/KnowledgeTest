@@ -12,8 +12,8 @@ public class GetAllQuestionHandler
         this._questionRepository = questionRepository;
     }
 
-    public async Task<IEnumerable<Question>> Handle(GetAllQuestion command)
+    public async Task<IEnumerable<Question>> Handle(GetAllQuestion command, CancellationToken cancellationToken = default(CancellationToken))
     {
-        return await _questionRepository.GetAll();
+        return await _questionRepository.GetAll(cancellationToken: cancellationToken);
     }
 }

@@ -13,9 +13,9 @@ public class CreateQuestionHandler
         this._questionRepository = questionRepository;
     }
 
-    public QuestionCreated Handle(CreateQuestion command)
+    public async Task<QuestionCreated> Handle(CreateQuestion command, CancellationToken cancellationToken = default(CancellationToken))
     {
-        this._questionRepository.Store(new Question() { Id = command.Id, Category =command.Category, Contents=command.Contents, DifficultyLevel=command.DifficultyLevel,Type=command.Type, Answers=command.Answers });
+        await this._questionRepository.Insert(new Question() { Id = command.Id, Category = command.Category, Contents = command.Contents, DifficultyLevel = command.DifficultyLevel, Type = command.Type, Answers = command.Answers }, cancellationToken: cancellationToken);
         return new QuestionCreated();
     }
 }

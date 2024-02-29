@@ -1,4 +1,5 @@
-﻿using KnowledgeTest.Options;
+﻿using KnowledgeTest.Models;
+using KnowledgeTest.Options;
 using Microsoft.Extensions.Options;
 using Neo4j.Driver;
 using System.Text.Json;
@@ -15,7 +16,6 @@ public class Neo4jDataAccess : INeo4jDataAccess
     private JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        
     };
 
     public Neo4jDataAccess(ILogger<Neo4jDataAccess> logger, IOptions<DatabaseNeo4jOptions> databaseNeo4jOptions)
@@ -24,22 +24,21 @@ public class Neo4jDataAccess : INeo4jDataAccess
         _logger = logger;
         driver = GraphDatabase.Driver(_option.Connection, AuthTokens.Basic(_option.User, _option.Password));
         _database = _option.Database;
-
         _session = driver.AsyncSession(o => o.WithDatabase(_database));
     }
 
-    public async Task<List<string>> ExecuteReadListAsync(string query, string returnObjectKey, IDictionary<string, object>? parameters = null, CancellationToken cancellationToken = default(CancellationToken))
+    public async Task<List<string>> ExecuteReadListAsync(string query, IDictionary<string, object>? parameters = null, CancellationToken cancellationToken = default(CancellationToken))
     {
         return await ExecuteReadTransactionAsync<string>(query: query, parameters: parameters, cancellationToken: cancellationToken);
     }
 
-    public async Task<List<T>> ExecuteReadListAsync<T>(string query, string returnObjectKey, IDictionary<string, object>? parameters = null, CancellationToken cancellationToken = default(CancellationToken))
+    public async Task<List<T>> ExecuteReadListAsync<T>(string query, IDictionary<string, object>? parameters = null, CancellationToken cancellationToken = default(CancellationToken))
     {
-        return await ExecuteReadTransactionAsync<T>(query: query, parameters:parameters, cancellationToken: cancellationToken);
+        return await ExecuteReadTransactionAsync<T>(query: query, parameters: parameters, cancellationToken: cancellationToken);
     }
-    public async Task<List<Dictionary<string, object>>> ExecuteReadDictionaryAsync(string query, string returnObjectKey, IDictionary<string, object>? parameters = null, CancellationToken cancellationToken = default(CancellationToken))
+    public async Task<List<Dictionary<string, object>>> ExecuteReadDictionaryAsync(string query, IDictionary<string, object>? parameters = null, CancellationToken cancellationToken = default(CancellationToken))
     {
-        return await ExecuteReadTransactionAsync<Dictionary<string, object>>(query,  parameters: parameters, cancellationToken: cancellationToken);
+        return await ExecuteReadTransactionAsync<Dictionary<string, object>>(query, parameters: parameters, cancellationToken: cancellationToken);
     }
 
     public async Task<T> ExecuteReadScalarAsync<T>(string query, IDictionary<string, object>? parameters = null, CancellationToken cancellationToken = default(CancellationToken))
@@ -65,7 +64,6 @@ public class Neo4jDataAccess : INeo4jDataAccess
         }
     }
 
-
     public async Task<T> ExecuteWriteTransactionAsync<T>(string query, IDictionary<string, object>? parameters = null, CancellationToken cancellationToken = default(CancellationToken))
     {
         try
@@ -88,11 +86,25 @@ public class Neo4jDataAccess : INeo4jDataAccess
             throw;
         }
     }
-    string MyDictionaryToJson(IReadOnlyDictionary<string,object> dict)
+    string MyDictionaryToJson(IReadOnlyDictionary<string, object> dict)
     {
         var entries = dict.Select(d =>
-            string.Format("\"{0}\": \"{1}\"", d.Key.Replace("n.",""), string.Join(",", d.Value)));
-        return "{" + string.Join(",", entries).Replace("\"[","[").Replace("]\"", "]") + "}";
+            string.Format("\"{0}\": \"{1}\"", d.Key.Replace("n.", ""), string.Join(",", d.Value)));
+        return "{" + string.Join(",", entries).Replace("\"[", "[").Replace("]\"", "]") + "}";
+    }
+
+    Question GetFaktory(IReadOnlyDictionary<string, object> dict)
+    {
+        //n.contents , n.type , n.difficultyLevel, n.Category ,n.answers
+        return new Question()
+        {
+            Id = Guid.TryParse(input: dict["n.id"]?.ToString(), out Guid result) ? result : Guid.Empty,
+            Type = dict["n.type"]?.ToString(),
+            Category = dict["n.Category"]?.ToString(),
+            DifficultyLevel= dict["n.difficultyLevel"]?.ToString(),
+           // Answers= dict["n.answers"]?.ToString(),
+            //{[n.contents, 
+        };
     }
     private async Task<List<T>> ExecuteReadTransactionAsync<T>(string query, IDictionary<string, object>? parameters, CancellationToken cancellationToken = default(CancellationToken))
     {
@@ -102,27 +114,15 @@ public class Neo4jDataAccess : INeo4jDataAccess
 
             var result = await _session.ExecuteReadAsync(async tx =>
             {
-                  var data = new List<T>();
-                    var res = await tx.RunAsync(query, parameters);
-                    var records = await res.ToListAsync();
-                    var teste = records.Select(x => x.Values).ToList();
-                    foreach (var iten in teste)
-                    {
-                    try
-                    {
-
-                        data.Add(JsonSerializer.Deserialize<T>(MyDictionaryToJson(iten), options: jsonSerializerOptions));
-                        // data.Add(JsonSerializer.Deserialize<T>(iten.Values));
-                    }
-                    catch (Exception ex)
-                    {
-
-                    }
+                var data = new List<T>();
+                var res = await tx.RunAsync(query, parameters);
+                var records = await res.ToListAsync();
+                var teste = records.Select(x => x.Values).ToList();
+                foreach (var iten in teste)
+                {
+                    data.Add((T)iten);
                 }
-              
                 return data;
-               
-
             });
 
             return result;
@@ -133,8 +133,7 @@ public class Neo4jDataAccess : INeo4jDataAccess
             throw;
         }
     }
-    
-    
+
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         await _session.CloseAsync();
