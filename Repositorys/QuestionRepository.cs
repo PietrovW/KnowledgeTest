@@ -1,6 +1,5 @@
 ﻿using KnowledgeTest.DAL.DataAccess;
 using KnowledgeTest.Models;
-using System.Collections.Generic;
 
 namespace KnowledgeTest.Repositorys;
 
@@ -31,19 +30,33 @@ public class QuestionRepository : IQuestionRepository
 
         return await _neo4jDataAccess.ExecuteWriteTransactionAsync<bool>(query, parameters, cancellationToken: cancellationToken);
     }
-
-    public Task<Question> GetById(Guid id, CancellationToken cancellationToken = default(CancellationToken))
+    public async Task<Question> GetById(Guid id, CancellationToken cancellationToken = default(CancellationToken))
     {
+
+        var query = @"MATCH (n:Question) WHERE toUpper(n.id) CONTAINS toUpper($id) 
+                                RETURN n.id, n.contents, n.difficultyLevel,n.Category, n.answers , n.type ";
+
+        var parameters = new Dictionary<string, object> { { "id", id.ToString() } };
+
+        var persons = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, parameters, cancellationToken: cancellationToken);
+        var result = new List<Question>();
+
+        foreach (var iten in persons)
+        {
+            result.Add(GetFaktory(iten));
+        }
+        return result.FirstOrDefault(); //persons;
+
+
         // if (_questions.TryGetValue(id, out var question))
         //{
         //  return question;
         // }
 
-        throw new ArgumentOutOfRangeException(nameof(id), "questions does not exist");
+      //  throw new ArgumentOutOfRangeException(nameof(id), "questions does not exist");
     }
     Question GetFaktory(IReadOnlyDictionary<string, object> dict)
     {
-        //n.contents , n.type , n.difficultyLevel, n.Category ,n.answers
         return new Question()
         {
             Id = Guid.TryParse(input: dict["n.id"]?.ToString(), out Guid result) ? result : Guid.Empty,
@@ -59,7 +72,7 @@ public class QuestionRepository : IQuestionRepository
         var query = "MATCH (n:Question) RETURN n.id, n.contents , n.type , n.difficultyLevel, n.Category ,n.answers";
 
         var list = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query: query, cancellationToken: cancellationToken);
-        List<Question> result = new List<Question>();
+        var result = new List<Question>();
         foreach (var iten in list)
         {
             result.Add(GetFaktory(iten));
@@ -69,10 +82,10 @@ public class QuestionRepository : IQuestionRepository
 
     public async Task<List<Dictionary<string, object>>> SearchPersonsByName(string searchString, CancellationToken cancellationToken = default(CancellationToken))
     {
-        var query = @"MATCH (p:Person) WHERE toUpper(p.name) CONTAINS toUpper($searchString) 
-                                RETURN p{ name: p.name, born: p.born } ORDER BY p.Name LIMIT 5";
+        var query = @"MATCH (n:Person) WHERE toUpper(n.name) CONTAINS toUpper($searchString) 
+                                RETURN p{ name: p.name, born: n.born } ORDER BY p.Name LIMIT 5";
 
-        IDictionary<string, object> parameters = new Dictionary<string, object> { { "searchString", searchString } };
+        var parameters = new Dictionary<string, object> { { "searchString", searchString } };
 
         var persons = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query, parameters, cancellationToken: cancellationToken);
 

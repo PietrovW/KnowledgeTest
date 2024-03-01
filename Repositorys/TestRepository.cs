@@ -1,5 +1,6 @@
 ﻿using KnowledgeTest.DAL.DataAccess;
 using KnowledgeTest.Models;
+using System.Threading;
 
 namespace KnowledgeTest.Repositorys;
 
@@ -47,9 +48,29 @@ public class TestRepository: ITestRepository
 
         throw new ArgumentOutOfRangeException(nameof(id), "questions does not exist");
     }
-
-    public IEnumerable<Test> GetAll()
+    Test GetFaktory(IReadOnlyDictionary<string, object> dict)
     {
-        return _tests.Values;
+        return new Test()
+        {
+            Id = Guid.TryParse(input: dict["n.id"]?.ToString(), out Guid result) ? result : Guid.Empty,
+           CandidateId = Guid.Parse(dict["n.CandidateId"]?.ToString()),
+            Description = dict["n.Description"]?.ToString(),
+           Name  = dict["n.Name"]?.ToString(),
+         //  Questions = dict["n.Questions"]?.ToString(),
+            // Answers= dict["n.answers"]?.ToString(),
+            //{[n.contents, 
+        };
+    }
+    public  async Task<IEnumerable<Test>> GetAll(CancellationToken cancellationToken = default(CancellationToken))
+    {
+        var query = "MATCH (n:Question) RETURN n.id, n.contents , n.type , n.difficultyLevel, n.Category ,n.answers";
+
+        var list = await _neo4jDataAccess.ExecuteReadDictionaryAsync(query: query, cancellationToken: cancellationToken);
+        var result = new List<Test>();
+        foreach (var iten in list)
+        {
+            result.Add(GetFaktory(iten));
+        }
+        return result;
     }
 }

@@ -44,4 +44,17 @@ public class CandidateRepository : ICandidateRepository
     {
         return _candidates.Values;
     }
+
+    Candidate GetFaktory(IReadOnlyDictionary<string, object> dict)
+    {
+        return new Candidate()
+        {
+            Id = Guid.TryParse(input: dict["n.id"]?.ToString(), out Guid result) ? result : Guid.Empty,
+            //Type = dict["n.type"]?.ToString(),
+           // Category = dict["n.Category"]?.ToString(),
+           // DifficultyLevel = dict["n.difficultyLevel"]?.ToString(),
+            // Answers= dict["n.answers"]?.ToString(),
+            //{[n.contents, 
+        };
+    }
 }
