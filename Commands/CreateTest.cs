@@ -10,4 +10,4 @@ public record CreateTest(
     [Required] string Name,
     [Required] string Description,
     IList<Question> Questions
-    );
+    ) : ICommand;
