@@ -1,12 +1,13 @@
 ﻿using KnowledgeTest.Models;
+using System.ComponentModel.DataAnnotations;
 using Wolverine;
 
 namespace KnowledgeTest.Commands;
 
 public record CreateTest(
-    Guid Id,
-    Guid CandidateId,
-    string Name,
-    string Description,
+    [Required] Guid Id,
+    [Required] Guid CandidateId,
+    [Required] string Name,
+    [Required] string Description,
     IList<Question> Questions
     );
