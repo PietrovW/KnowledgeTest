@@ -1,5 +1,6 @@
-﻿using Wolverine;
+﻿using System.ComponentModel.DataAnnotations;
+using Wolverine;
 
 namespace KnowledgeTest.Queries;
 
-public record GetByIdCandidate(Guid Id) : IMessage;
+public record GetByIdCandidate([Required] Guid Id) : IMessage;

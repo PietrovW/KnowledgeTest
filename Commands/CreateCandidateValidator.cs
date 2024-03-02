@@ -2,9 +2,9 @@
 
 namespace KnowledgeTest.Commands;
 
-public class CreateCandidateValidator : AbstractValidator<CreateCandidate>
+public class GetByIdCandidateValidator : AbstractValidator<CreateCandidate>
 {
-    public CreateCandidateValidator()
+    public GetByIdCandidateValidator()
     {
         RuleFor(x => x.Id).NotNull();
         RuleFor(x => x.Email)

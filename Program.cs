@@ -11,6 +11,7 @@ using Wolverine.FluentValidation;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<DatabaseNeo4jOptions>(
     builder.Configuration.GetSection(DatabaseNeo4jOptions.DatabaseNeo4j));
+builder.Configuration.AddEnvironmentVariables(prefix: "KnowledgeTest_");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Host.UseWolverine(opts =>
@@ -47,7 +48,8 @@ app.MapPost("/questions", async (CreateQuestion body, IMessageBus bus) =>
 {
     await bus.InvokeAsync(body);
     return Results.Created($"/questions/{body.Id}", body);
-}).WithOpenApi();
+}).Produces<CandidateCreated>(StatusCodes.Status201Created)
+.Produces(StatusCodes.Status400BadRequest).WithOpenApi();
 
 app.MapGet("/questions/{id}", async (Guid id, IMessageBus bus) =>
  await bus.InvokeAsync<Question>(new GetByIdQuestion(Id: id)) is Question item
@@ -73,22 +75,4 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
-
-//app.MapGet("/weatherforecast", () =>
-//{
-//    var forecast =  Enumerable.Range(1, 5).Select(index =>
-//        new WeatherForecast
-//        (
-//            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-//            Random.Shared.Next(-20, 55),
-//            summaries[Random.Shared.Next(summaries.Length)]
-//        ))
-//        .ToArray();
-//    return forecast;
-//})
-//.WithName("GetWeatherForecast")
-//.WithOpenApi();
-
-//app.Run();
 return await app.RunOaktonCommands(args);
