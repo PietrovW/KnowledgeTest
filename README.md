@@ -17,8 +17,8 @@ An application for creating a database of tests to verify learning progress
 
 ## Links
 
-[Link architecture pattern](https://github.com/dotnet-architecture/eShopOnWeb)
-[Clean Architecture](https://github.com/jasontaylordev/CleanArchitecture)
+* [Link architecture pattern](https://github.com/dotnet-architecture/eShopOnWeb)
+* [Clean Architecture](https://github.com/jasontaylordev/CleanArchitecture)
 
 
 ## License
