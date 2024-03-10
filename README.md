@@ -1,5 +1,5 @@
 # KnowledgeTest
-
+An application for creating a database of tests to verify learning progress
 
 ## Starting the server neo4j
 
